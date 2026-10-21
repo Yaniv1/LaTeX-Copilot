@@ -1,28 +1,33 @@
 [CmdletBinding()]
 param(
-    [string]$ProfileName = 'private',
+    [string]$ProfileName,
     [string]$ExpectedUser,
     [ValidateSet('default', 'chrome', 'edge')]
-    [string]$Browser = 'default'
+    [string]$Browser = 'default',
+    [switch]$ReplaceExisting
 )
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
 Import-Module (Join-Path $PSScriptRoot 'LaTeXCopilot.psm1') -Force
-if ($ProfileName -notmatch '^[A-Za-z0-9._-]+$') {
+if (-not [string]::IsNullOrWhiteSpace($ProfileName) -and
+    $ProfileName -notmatch '^[A-Za-z0-9._-]+$') {
     throw 'ProfileName contains unsupported characters.'
 }
 if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
     throw 'GitHub CLI is required.'
 }
 
-$ghConfigDirectory = Join-Path $env:APPDATA "LaTeX-CoPilot\GitHubProfiles\$ProfileName"
-New-Item -ItemType Directory -Path $ghConfigDirectory -Force | Out-Null
+$profilesRoot = Join-Path $env:APPDATA 'LaTeX-CoPilot\GitHubProfiles'
+New-Item -ItemType Directory -Path $profilesRoot -Force | Out-Null
+$pendingConfigDirectory = Join-Path $profilesRoot ('.pending-' + [guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path $pendingConfigDirectory | Out-Null
 $oldConfig = $env:GH_CONFIG_DIR
 $oldBrowser = $env:GH_BROWSER
+$profileCreated = $false
 try {
-    $env:GH_CONFIG_DIR = $ghConfigDirectory
+    $env:GH_CONFIG_DIR = $pendingConfigDirectory
     if ($Browser -eq 'chrome') {
         $chromePaths = @(
             "$env:ProgramFiles\Google\Chrome\Application\chrome.exe",
@@ -52,17 +57,48 @@ try {
     if (-not [string]::IsNullOrWhiteSpace($ExpectedUser) -and $actualUser -cne $ExpectedUser) {
         throw "Authenticated user '$actualUser' does not match expected user '$ExpectedUser'."
     }
+
+    $resolvedProfileName = if ([string]::IsNullOrWhiteSpace($ProfileName)) {
+        $actualUser
+    }
+    else {
+        $ProfileName
+    }
+    if ($resolvedProfileName -notmatch '^[A-Za-z0-9._-]+$') {
+        throw "The resolved profile name '$resolvedProfileName' contains unsupported characters."
+    }
+
+    $profilePath = Join-Path (Get-LaTeXCopilotRoot) "Agent\.state\github-profiles\$resolvedProfileName.json"
+    $ghConfigDirectory = Join-Path $profilesRoot $resolvedProfileName
+    $profileExists = (Test-Path -LiteralPath $profilePath) -or
+        (Test-Path -LiteralPath $ghConfigDirectory)
+    if ($profileExists -and -not $ReplaceExisting) {
+        throw "GitHub profile '$resolvedProfileName' already exists. Choose another name or use -ReplaceExisting."
+    }
+    if ($profileExists) {
+        if (Test-Path -LiteralPath $profilePath -PathType Leaf) {
+            Remove-Item -LiteralPath $profilePath -Force
+        }
+        if (Test-Path -LiteralPath $ghConfigDirectory -PathType Container) {
+            Remove-Item -LiteralPath $ghConfigDirectory -Recurse -Force
+        }
+    }
+
+    Move-Item -LiteralPath $pendingConfigDirectory -Destination $ghConfigDirectory
+    Write-JsonAtomic -Path $profilePath -Value ([ordered]@{
+        profileName = $resolvedProfileName
+        githubUser = $actualUser
+        ghConfigDir = $ghConfigDirectory
+        configuredAtUtc = [DateTime]::UtcNow.ToString('o')
+    })
+    $profileCreated = $true
 }
 finally {
     if ($null -eq $oldConfig) { Remove-Item Env:GH_CONFIG_DIR -ErrorAction SilentlyContinue } else { $env:GH_CONFIG_DIR = $oldConfig }
     if ($null -eq $oldBrowser) { Remove-Item Env:GH_BROWSER -ErrorAction SilentlyContinue } else { $env:GH_BROWSER = $oldBrowser }
+    if (-not $profileCreated -and (Test-Path -LiteralPath $pendingConfigDirectory -PathType Container)) {
+        Remove-Item -LiteralPath $pendingConfigDirectory -Recurse -Force
+    }
 }
 
-$profilePath = Join-Path (Get-LaTeXCopilotRoot) "Agent\.state\github-profiles\$ProfileName.json"
-Write-JsonAtomic -Path $profilePath -Value ([ordered]@{
-    profileName = $ProfileName
-    githubUser = $actualUser
-    ghConfigDir = $ghConfigDirectory
-    configuredAtUtc = [DateTime]::UtcNow.ToString('o')
-})
-Write-Host "Configured isolated GitHub profile '$ProfileName' for $actualUser."
+Write-Host "Configured isolated GitHub profile '$resolvedProfileName' for $actualUser."

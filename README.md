@@ -41,14 +41,16 @@ Keep personal paper repositories isolated from work GitHub credentials:
 
 ```powershell
 .\Agent\Scripts\Configure-GitHubProfile.ps1 `
-  -ProfileName private `
   -ExpectedUser your-private-github-user `
   -Browser chrome
 ```
 
 Authentication is stored by GitHub CLI under the user's application-data
 directory, not in this repository. Paper Git commands select that isolated
-profile explicitly.
+profile explicitly. By default, the profile name is the authenticated GitHub
+username. An existing profile is never overwritten unless
+`-ReplaceExisting` is supplied explicitly; alternatively, use `-ProfileName`
+to create a distinct alias.
 
 List the available profile names and their GitHub users at any time:
 
@@ -72,7 +74,7 @@ Create and use paper Git in independent stages:
 
 .\Agent\Scripts\Create-PaperGitHubRemote.ps1 `
   -PaperPath C:\path\to\paper `
-  -ProfileName private
+  -ProfileName your-private-github-user
 
 .\Agent\Scripts\Sync-PaperGit.ps1 `
   -PaperPath C:\path\to\paper `

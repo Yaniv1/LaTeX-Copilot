@@ -56,8 +56,10 @@ the selected paper's `Authoring\.run-state\sync-requests`, and approve only a
 verified request with `Agent\Scripts\Approve-OverleafSync.ps1`.
 
 Use `Agent\Scripts\Configure-GitHubProfile.ps1` to create an isolated,
-non-work GitHub CLI profile outside the repository. Local and remote Git are
-separate resources with separate permissions:
+non-work GitHub CLI profile outside the repository. When no profile name is
+provided, use the authenticated GitHub username. Never replace an existing
+profile unless the author explicitly authorizes `-ReplaceExisting`. Local and
+remote Git are separate resources with separate permissions:
 
 - `Initialize-LocalPaperGit.ps1` creates only the local repository.
 - `Commit-PaperGit.ps1` reviews and commits local changes without pushing.

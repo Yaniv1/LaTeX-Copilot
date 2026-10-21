@@ -34,9 +34,8 @@ switch ($selection) {
         & (Join-Path $scriptsRoot 'List-GitHubProfiles.ps1')
     }
     '5' {
-        $profileName = Read-Host 'Local profile name [private]'
-        if ([string]::IsNullOrWhiteSpace($profileName)) { $profileName = 'private' }
-        $githubUser = Read-Host 'Expected GitHub username'
+        $profileName = Read-Host 'Local profile name [authenticated GitHub username]'
+        $githubUser = Read-Host 'Expected GitHub username (optional)'
         & (Join-Path $scriptsRoot 'Configure-GitHubProfile.ps1') `
             -ProfileName $profileName `
             -ExpectedUser $githubUser

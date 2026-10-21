@@ -9,7 +9,8 @@ $profiles = @(Get-GitHubProfiles)
 if ($profiles.Count -eq 0) {
     Write-Host 'No isolated GitHub profiles are configured.'
     Write-Host 'Create one with:'
-    Write-Host '  Agent\Scripts\Configure-GitHubProfile.ps1 -ProfileName <name> -ExpectedUser <github-user>'
+    Write-Host '  Agent\Scripts\Configure-GitHubProfile.ps1 -ExpectedUser <github-user>'
+    Write-Host 'The authenticated GitHub username becomes the default profile name.'
     exit 0
 }
 

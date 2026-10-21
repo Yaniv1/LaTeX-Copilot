@@ -1,0 +1,22 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{paper-template}[2026/10/20 LaTeX-CoPilot demo template]
+
+\RequirePackage[margin=1in]{geometry}
+\RequirePackage{microtype}
+\RequirePackage{graphicx}
+\RequirePackage{booktabs}
+\RequirePackage[hidelinks]{hyperref}
+
+\newcommand{\storedauthornote}{}
+\newcommand{\authornote}[1]{\renewcommand{\storedauthornote}{#1}}
+
+\AtBeginDocument{%
+  \ifx\storedauthornote\empty
+  \else
+    \begingroup
+    \renewcommand{\thefootnote}{}
+    \footnotetext{\storedauthornote}
+    \addtocounter{footnote}{-1}
+    \endgroup
+  \fi
+}

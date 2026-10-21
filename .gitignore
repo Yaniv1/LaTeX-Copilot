@@ -1,0 +1,16 @@
+Agent/.venv/
+Agent/.state/
+Agent/.run-state/
+Agent/.sync-work/
+Agent/.sync-backups/
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+.DS_Store
+Thumbs.db

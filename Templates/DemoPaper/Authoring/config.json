@@ -1,0 +1,34 @@
+{
+  "paper": {
+    "title": "DemoPaper",
+    "authors": [
+      "Demo Author"
+    ],
+    "workspaceName": "DemoPaper",
+    "mainFile": "main.tex",
+    "maximumPages": 10
+  },
+  "overleaf": {
+    "projectId": "",
+    "projectUrl": "",
+    "downloadUrl": "",
+    "account": ""
+  },
+  "browser": {
+    "browserId": "latex-copilot-demopaper",
+    "debuggingAddress": "127.0.0.1",
+    "debuggingPort": 9360,
+    "profilePath": "%LOCALAPPDATA%\\LaTeX-CoPilot\\Browsers\\{browserId}\\EdgeProfile",
+    "authenticationTimeoutSeconds": 900,
+    "operationTimeoutSeconds": 600
+  },
+  "git": {
+    "profileName": "",
+    "owner": "",
+    "repository": "",
+    "visibility": "private",
+    "remoteName": "origin",
+    "defaultBranch": "main"
+  },
+  "createdAtUtc": null
+}

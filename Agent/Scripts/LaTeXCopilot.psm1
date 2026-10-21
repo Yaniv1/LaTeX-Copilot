@@ -127,38 +127,14 @@ function Invoke-GitWithProfile {
 
     $profile = Get-GitHubProfile -ProfileName $ProfileName
     $oldConfig = $env:GH_CONFIG_DIR
-    $oldAskPass = $env:GIT_ASKPASS
-    $oldPrompt = $env:GIT_TERMINAL_PROMPT
-    $oldToken = $env:LATEX_COPILOT_GITHUB_TOKEN
-    $temporaryDirectory = Join-Path ([System.IO.Path]::GetTempPath()) ('latex-copilot-git-' + [guid]::NewGuid().ToString('N'))
 
     try {
         $env:GH_CONFIG_DIR = [string]$profile.ghConfigDir
-        $token = (& gh auth token).Trim()
-        if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($token)) {
-            throw "Unable to obtain a token for GitHub profile '$ProfileName'."
+        & gh auth setup-git --hostname github.com
+        if ($LASTEXITCODE -ne 0) {
+            throw "Unable to configure Git credentials for GitHub profile '$ProfileName'."
         }
-        New-Item -ItemType Directory -Path $temporaryDirectory -Force | Out-Null
-        $askPassPowerShell = Join-Path $temporaryDirectory 'askpass.ps1'
-        $askPassCommand = Join-Path $temporaryDirectory 'askpass.cmd'
-        @'
-param([string]$PromptText)
-if ($PromptText -match '(?i)username') {
-    Write-Output 'x-access-token'
-}
-else {
-    Write-Output $env:LATEX_COPILOT_GITHUB_TOKEN
-}
-'@ | Set-Content -LiteralPath $askPassPowerShell -Encoding ASCII
-        @'
-@echo off
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0askpass.ps1" "%~1"
-'@ | Set-Content -LiteralPath $askPassCommand -Encoding ASCII
-
-        $env:GIT_ASKPASS = $askPassCommand
-        $env:GIT_TERMINAL_PROMPT = '0'
-        $env:LATEX_COPILOT_GITHUB_TOKEN = $token
-        $output = & git -C $RepositoryRoot -c 'credential.helper=' @Arguments 2>&1
+        $output = & git -C $RepositoryRoot @Arguments 2>&1
         if ($LASTEXITCODE -ne 0) {
             throw "Git failed: git $($Arguments -join ' ')`n$($output -join [Environment]::NewLine)"
         }
@@ -166,13 +142,6 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0askpass.ps1" "%~1"
     }
     finally {
         if ($null -eq $oldConfig) { Remove-Item Env:GH_CONFIG_DIR -ErrorAction SilentlyContinue } else { $env:GH_CONFIG_DIR = $oldConfig }
-        if ($null -eq $oldAskPass) { Remove-Item Env:GIT_ASKPASS -ErrorAction SilentlyContinue } else { $env:GIT_ASKPASS = $oldAskPass }
-        if ($null -eq $oldPrompt) { Remove-Item Env:GIT_TERMINAL_PROMPT -ErrorAction SilentlyContinue } else { $env:GIT_TERMINAL_PROMPT = $oldPrompt }
-        if ($null -eq $oldToken) { Remove-Item Env:LATEX_COPILOT_GITHUB_TOKEN -ErrorAction SilentlyContinue } else { $env:LATEX_COPILOT_GITHUB_TOKEN = $oldToken }
-        if (Test-Path -LiteralPath $temporaryDirectory) {
-            Remove-Item -LiteralPath $temporaryDirectory -Recurse -Force -ErrorAction SilentlyContinue
-        }
-        $token = $null
     }
 }
 

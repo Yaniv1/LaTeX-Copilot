@@ -23,12 +23,21 @@
     "operationTimeoutSeconds": 600
   },
   "git": {
+    "localInitialized": false,
+    "remoteConfigured": false,
     "profileName": "",
     "owner": "",
     "repository": "",
     "visibility": "private",
     "remoteName": "origin",
     "defaultBranch": "main"
+  },
+  "agentSession": {
+    "activeSessionId": "",
+    "lastStartedAtUtc": null,
+    "lastStartedAtPst": null,
+    "resumeCommand": "",
+    "history": []
   },
   "createdAtUtc": null
 }

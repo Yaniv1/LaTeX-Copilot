@@ -21,4 +21,7 @@ each coherent revision, resolve errors and undefined references, and report
 page count and material warnings. Never publish, synchronize, commit, or push
 without the authorization required by the selected workflow.
 
-If no template is requested use the default template under Paper/templates/paper-template.sty.
+If no template is requested, use the default IEEE template under
+`Paper/template/paper-template.sty`. The template loads the dedicated
+`Paper/template/ext.sty` extension package, including the `enumpar`
+environment for compact inline enumerations.

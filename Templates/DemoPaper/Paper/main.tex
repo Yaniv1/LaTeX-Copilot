@@ -1,14 +1,25 @@
-\documentclass[11pt]{article}
+\documentclass{template/ieeetj}
+
+\makeatletter
+\def\input@path{{template/}}
+\makeatother
 
 \usepackage{template/paper-template}
 
 \title{{{TITLE}}}
 \author{{{AUTHORS_LATEX}}}
-\date{}
+\affil{Independent researcher}
 
 \authornote{Demonstration manuscript for a structured critical reading.}
 
 \begin{document}
+\receiveddate{XX Month, XXXX}
+\reviseddate{XX Month, XXXX}
+\accepteddate{XX Month, XXXX}
+\publisheddate{XX Month, XXXX}
+\currentdate{\today}
+\doiinfo{DOI pending}
+
 \maketitle
 
 \begin{abstract}
@@ -34,6 +45,12 @@ artifacts. It then tests whether each inferential step is supported, whether
 important assumptions are explicit, and whether alternative explanations
 remain credible.
 
+\begin{enumpar}
+  \item identify the article's principal claim
+  \item trace the evidence supporting that claim
+  \item test the assumptions connecting evidence to inference
+\end{enumpar}
+
 \section{Discussion}
 
 The resulting critique should distinguish a demonstrated defect from a
@@ -46,7 +63,7 @@ that would resolve it.
 Structured critical reading improves rigor by making both praise and
 criticism accountable to identifiable claims, methods, and evidence.
 
-\bibliographystyle{plain}
-\bibliography{refs/refs}
+% Add \bibliographystyle{IEEEtran} and \bibliography{refs/refs} after
+% introducing the manuscript's first citation.
 
 \end{document}

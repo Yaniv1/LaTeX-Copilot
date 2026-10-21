@@ -25,9 +25,14 @@ if ($null -eq $copilot) {
 $prompt = @"
 Start an interactive LaTeX-CoPilot session.
 Selected paper workspace: $PaperPath
-Read its Authoring configuration and paper-specific instructions, inspect its
-current manuscript state, and ask the author what to do. Keep the agent code
-and paper workspace strictly separated.
+Before inspecting the manuscript, run Record-AgentSession.ps1 for this paper
+to persist this new instance's COPILOT_AGENT_SESSION_ID and recovery command.
+Then read its Authoring configuration and paper-specific instructions,
+inspect its current manuscript state, and ask the author what to do. Before
+implementing any paper-content request, rewrite the appropriate semantic
+section of paper-specific.md so it remains a cohesive current specification,
+not a chronological request log. Keep the agent code and paper workspace
+strictly separated.
 "@
 
 & $copilot.Source `

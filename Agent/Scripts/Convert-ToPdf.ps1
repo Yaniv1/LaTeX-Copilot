@@ -26,6 +26,7 @@ if (-not [string]::IsNullOrWhiteSpace($OutputPath)) {
         [System.IO.Path]::GetFullPath((Join-Path $paperRoot $OutputPath))
     }
 }
+$finalPdf = [System.IO.Path]::GetFullPath($finalPdf)
 $paperPrefix = [System.IO.Path]::GetFullPath($paperRoot).TrimEnd('\') + '\'
 if (-not $finalPdf.StartsWith($paperPrefix, [System.StringComparison]::OrdinalIgnoreCase) -or
     [System.IO.Path]::GetExtension($finalPdf) -ine '.pdf') {

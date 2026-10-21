@@ -87,6 +87,31 @@ function Get-GitHubProfile {
     return Get-Content -LiteralPath $profilePath -Raw | ConvertFrom-Json
 }
 
+function Get-GitHubProfiles {
+    $profilesRoot = Join-Path (Get-LaTeXCopilotRoot) 'Agent\.state\github-profiles'
+    if (-not (Test-Path -LiteralPath $profilesRoot -PathType Container)) {
+        return @()
+    }
+
+    return @(
+        Get-ChildItem -LiteralPath $profilesRoot -Filter '*.json' -File |
+            Sort-Object BaseName |
+            ForEach-Object {
+                try {
+                    $profile = Get-Content -LiteralPath $_.FullName -Raw | ConvertFrom-Json
+                    [pscustomobject]@{
+                        ProfileName = [string]$profile.profileName
+                        GitHubUser = [string]$profile.githubUser
+                        ConfiguredAtUtc = [string]$profile.configuredAtUtc
+                    }
+                }
+                catch {
+                    Write-Warning "Ignoring invalid GitHub profile file: $($_.FullName)"
+                }
+            }
+    )
+}
+
 function Invoke-GhWithProfile {
     param(
         [Parameter(Mandatory = $true)]
@@ -153,5 +178,6 @@ Export-ModuleMember -Function `
     Get-ActivePaperPath, `
     Set-ActivePaperPath, `
     Get-GitHubProfile, `
+    Get-GitHubProfiles, `
     Invoke-GhWithProfile, `
     Invoke-GitWithProfile
